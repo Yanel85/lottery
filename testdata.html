@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Excel测试数据生成器</title>
+        <script src="./resources/xlsx.full.min.js"></script>
+        <!-- 引入 Tailwind CSS CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+
+    <body class="bg-gradient-to-br from-indigo-900 via-red-700 to-indigo-900 min-h-screen flex justify-center items-center p-5">
+        <div class="bg-white/95 rounded-2xl shadow-2xl w-full max-w-3xl p-8 m-6 transition-transform hover:-translate-y-1">
+            <header class="text-center mb-8">
+                <h1 class="text-indigo-900 mb-2 text-3xl font-bold flex items-center justify-center gap-4">
+                    Excel测试数据生成器
+                </h1>
+                <p class="text-gray-600 text-base max-w-xl mx-auto leading-relaxed">
+                    生成包含编号、姓名、性别和联系电话的测试Excel文件，可用于开发测试、演示或教学用途
+                </p>
+            </header>
+
+            <div class="flex flex-wrap gap-5 mb-8 bg-gray-50 p-5 rounded-xl shadow-inner">
+                <div class="flex-1 min-w-[200px]">
+                    <label for="rowCount" class="block mb-2 font-semibold text-gray-800">
+                        生成行数
+                    </label>
+                    <input type="number" id="rowCount" min="1" max="1000" value="10" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition" />
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label for="idPrefix" class="block mb-2 font-semibold text-gray-800">
+                        ID前缀
+                    </label>
+                    <input type="text" id="idPrefix" value="1000" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition" />
+                </div>
+            </div>
+
+            <div class="text-center my-8">
+                <button class="bg-gradient-to-r from-green-600 to-green-400 text-white border-0 px-10 py-3 text-lg font-semibold rounded-full cursor-pointer transition hover:-translate-y-1 hover:shadow-xl active:translate-y-0 inline-flex items-center gap-2" id="generateBtn">
+                    生成并下载Excel文件
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl p-5 shadow-md overflow-x-auto">
+                <h2 class="text-gray-800 mb-4 text-xl font-bold flex items-center gap-2">
+                    数据预览
+                </h2>
+                <div class="overflow-x-auto">
+                    <table id="previewTable" class="w-full border-collapse mt-2">
+                        <thead>
+                            <tr>
+                                <th class="bg-blue-500 text-white text-left px-4 py-3 font-semibold">编号</th>
+                                <th class="bg-blue-500 text-white text-left px-4 py-3 font-semibold">姓名</th>
+                                <th class="bg-blue-500 text-white text-left px-4 py-3 font-semibold">性别</th>
+                                <th class="bg-blue-500 text-white text-left px-4 py-3 font-semibold">联系电话</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 预览数据将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-blue-100 border-l-4 border-blue-500 p-5 rounded-r-xl">
+                <h3 class="text-gray-800 mb-2 font-bold flex items-center gap-2">
+                    使用说明
+                </h3>
+                <ul class="pl-5 list-disc text-gray-700">
+                    <li>设置需要生成的数据行数（最多1000行）</li>
+                    <li>设置ID前缀（如1000，生成的ID将为100001, 100002等）</li>
+                    <li>点击"生成并下载Excel文件"按钮</li>
+                    <li>生成的文件包含四列数据：编号、姓名、性别和手机号</li>
+                    <li>手机号均为虚拟号码，不可用于真实通信</li>
+                </ul>
+            </div>
+
+            <footer class="text-center mt-8 text-gray-400 text-sm">
+                <!-- 可选页脚内容 -->
+            </footer>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const generateBtn = document.getElementById('generateBtn');
+                const rowCountInput = document.getElementById('rowCount');
+                const idPrefixInput = document.getElementById('idPrefix');
+                const previewTable = document.getElementById('previewTable').getElementsByTagName('tbody')[0];
+
+                // 中文姓氏库
+                const lastNames = ['王', '李', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴',
+                    '徐', '孙', '胡', '朱', '高', '林', '何', '郭', '马', '罗'];
+
+                // 中文名字库
+                const firstNames = ['伟', '芳', '娜', '秀英', '敏', '静', '丽', '强', '磊', '洋',
+                    '艳', '勇', '军', '杰', '娟', '涛', '明', '超', '秀兰', '霞',
+                    '平', '刚', '桂英', '文', '辉', '丹', '鹏', '玉兰', '建华', '红'];
+
+                // 生成随机姓名
+                function generateRandomName() {
+                    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                    return lastName + firstName;
+                }
+
+                // 生成随机手机号
+                function generateRandomPhone() {
+                    const prefixes = ['130', '131', '132', '133', '134', '135', '136', '137',
+                        '138', '139', '150', '151', '152', '153', '155', '156',
+                        '157', '158', '159', '180', '181', '182', '183', '184', '185', '186', '187', '188', '189'];
+                    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    let suffix = '';
+                    for (let i = 0; i < 8; i++) {
+                        suffix += Math.floor(Math.random() * 10);
+                    }
+                    return prefix + suffix;
+                }
+
+                // 生成测试数据
+                function generateTestData() {
+                    const rowCount = parseInt(rowCountInput.value) || 10;
+                    const idPrefix = idPrefixInput.value || '1000';
+                    const data = [];
+
+                    for (let i = 1; i <= rowCount; i++) {
+                        data.push({
+                            id: idPrefix + (i < 10 ? '0' : '') + (i < 100 ? '0' : '') + i,
+                            name: generateRandomName(),
+                            gender: Math.random() < 0.5 ? '男' : '女',
+                            phone: generateRandomPhone()
+                        });
+                    }
+
+                    return data;
+                }
+
+                // 更新预览表格
+                function updatePreview() {
+                    const data = generateTestData();
+                    previewTable.innerHTML = '';
+
+                    // 限制预览最多显示10行
+                    const previewRows = Math.min(data.length, 10);
+
+                    for (let i = 0; i < previewRows; i++) {
+                        const row = previewTable.insertRow();
+                        row.insertCell(0).textContent = data[i].id;
+                        row.insertCell(1).textContent = data[i].name;
+                        row.insertCell(2).textContent = data[i].gender;
+                        row.insertCell(3).textContent = data[i].phone;
+                    }
+
+                    if (data.length > 10) {
+                        const row = previewTable.insertRow();
+                        const cell = row.insertCell(0);
+                        cell.colSpan = 4;
+                        cell.textContent = `... 还有 ${data.length - 10} 行数据未显示 ...`;
+                        cell.style.textAlign = 'center';
+                        cell.style.color = '#7f8c8d';
+                        cell.style.fontStyle = 'italic';
+                    }
+                }
+
+                // 生成并下载Excel文件
+                function generateAndDownloadExcel() {
+                    const data = generateTestData();
+
+                    // 创建工作簿
+                    const wb = XLSX.utils.book_new();
+
+                    // 创建工作表数据
+                    const wsData = [
+                        ['编号', '姓名', '性别', '联系电话']
+                    ];
+
+                    data.forEach(row => {
+                        wsData.push([row.id, row.name, row.gender, row.phone]);
+                    });
+
+                    // 创建工作表
+                    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+                    // 将工作表添加到工作簿
+                    XLSX.utils.book_append_sheet(wb, ws, "测试数据");
+
+                    // 生成Excel文件并下载
+                    XLSX.writeFile(wb, "测试数据.xlsx");
+                }
+
+                // 初始化预览
+                updatePreview();
+
+                // 事件监听
+                generateBtn.addEventListener('click', generateAndDownloadExcel);
+                rowCountInput.addEventListener('input', function () {
+                    // 限制最大行数
+                    if (this.value > 1000) this.value = 1000;
+                    if (this.value < 1) this.value = 1;
+                    updatePreview();
+                });
+                idPrefixInput.addEventListener('input', updatePreview);
+            });
+        </script>
+    </body>
+
+</html>
