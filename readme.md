@@ -3,6 +3,7 @@
 ## 项目简介
 
 本项目为一个基于前端的招生摇号系统，支持学生信息的导入、管理、查询及摇号抽取，并可导出摇号结果。适用于学校、培训机构等场景的公开、公平、公正摇号需求。
+可以不联网使用，数据保存在本地，防止信息泄漏。
 
 ## 主要功能
 
@@ -31,7 +32,6 @@
 
 - [Tailwind CSS](https://tailwindcss.com/) 用于页面样式
 - [SheetJS (xlsx)](https://github.com/SheetJS/sheetjs) 用于 Excel 文件的读写
-- [jQuery](https://jquery.com/)（仅主页面部分功能使用）
 
 所有依赖均通过本地或引入，无需额外安装。
 
